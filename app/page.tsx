@@ -1,14 +1,13 @@
 import { AppSidebar } from "@/_elements/appSidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import Image from "next/image";
-import AdminLayout from "./admin/layout";
 
 export default function Home() {
   return (
     <div className="flex flex-1 flex-col gap-6 p-6">
       <div>
         <h1 className="text-3xl font-bold">
-          Student Information System
+          Dashboard
         </h1>
 
         <p className="text-muted-foreground">

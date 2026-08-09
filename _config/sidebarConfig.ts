@@ -7,6 +7,8 @@ import {
   ClipboardCheck,
   CalendarDays,
   FileBarChart,
+  PlusIcon,
+  School,
 } from "lucide-react"
 
 export type UserRole = "admin" | "teacher" | "student"
@@ -16,7 +18,7 @@ export type SidebarItem = {
   url: string
   icon: React.ElementType
   roles: UserRole[]
-  items?: SidebarItem[]
+  subItems?: SidebarItem[]
 }
 
 export const sidebarItems: SidebarItem[] = [
@@ -26,32 +28,31 @@ export const sidebarItems: SidebarItem[] = [
     icon: LayoutDashboard,
     roles: ["admin", "teacher", "student"],
   },
-
+ {
+    title: "Academics",
+    url: "/academics",
+    icon: School,
+    roles: ["admin", "teacher", "student"],
+  },
   {
     title: "Students",
-    url: "#",
+    url: "",
     icon: UserPlus,
-    roles: ["admin"],
-    // items: [
-    //   {
-    //     title: "Students",
-    //     url: "/registrations/students",
-    //     icon: GraduationCap,
-    //     roles: ["admin"],
-    //   },
-    //   {
-    //     title: "Teachers",
-    //     url: "/registrations/teachers",
-    //     icon: Users,
-    //     roles: ["admin"],
-    //   },
-    //   {
-    //     title: "Subjects",
-    //     url: "/registrations/subjects",
-    //     icon: BookOpen,
-    //     roles: ["admin"],
-    //   },
-    // ],
+    roles: ["admin", "teacher"],
+    subItems: [
+      {
+        title: "Enroll Students",
+        url: "/students/registration",
+        icon: PlusIcon,
+        roles: ["admin"],
+      },
+      {
+        title: "Student List",
+        url: "/students",
+        icon: Users,
+        roles: ["admin", "teacher"],
+      },
+    ],
   },
   {
     title: "Subjects",
@@ -94,7 +95,7 @@ export function getSidebarItems(role: UserRole) {
     .filter((item) => item.roles.includes(role))
     .map((item) => ({
       ...item,
-      items: item.items?.filter((subItem) =>
+      subItems: item.subItems?.filter((subItem) =>
         subItem.roles.includes(role)
       ),
     }))

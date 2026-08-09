@@ -53,7 +53,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
             <span className="text-sm font-semibold">AI-PDSS</span>
 
             <span className="text-xs text-muted-foreground">
-              Student Information System
+              AI Driven Learning System
             </span>
           </div>
         </div>
@@ -68,6 +68,55 @@ export function AppSidebar({ role }: AppSidebarProps) {
             <SidebarMenu>
               {items.map((item) => {
                 const Icon = item.icon;
+
+                if (item.subItems?.length) {
+                  const hasActiveChild = item.subItems.some(
+                    (child) => pathname === child.url,
+                  );
+
+                  return (
+                    <Collapsible
+                      key={item.title}
+                      defaultOpen={!hasActiveChild}
+                      className="group/collapsible"
+                    >
+                      <SidebarMenuItem>
+                        <CollapsibleTrigger
+                          render={
+                            <SidebarMenuButton
+                              isActive={hasActiveChild}
+                              tooltip={item.title}
+                            >
+                              <Icon />
+                              <span>{item.title}</span>
+                              <ChevronRight className="ml-auto transition-transform duration-200 group-data-open/collapsible:rotate-90" />
+                            </SidebarMenuButton>
+                          }
+                        />
+
+                        <CollapsibleContent>
+                          <SidebarMenuSub>
+                            {item.subItems?.map((child) => {
+                              const ChildIcon = child.icon;
+
+                              return (
+                                <SidebarMenuSubItem key={child.title}>
+                                  <SidebarMenuSubButton
+                                    isActive={pathname === child.url}
+                                    render={<Link href={child.url} />}
+                                  >
+                                    <ChildIcon />
+                                    <span>{child.title}</span>
+                                  </SidebarMenuSubButton>
+                                </SidebarMenuSubItem>
+                              );
+                            })}
+                          </SidebarMenuSub>
+                        </CollapsibleContent>
+                      </SidebarMenuItem>
+                    </Collapsible>
+                  );
+                }
 
                 /*
                  * Normal item
