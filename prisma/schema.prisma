@@ -1,0 +1,144 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model instructor {
+  id         Int      @id @default(autoincrement())
+  firstName  String
+  middleName String
+  lastName   String
+  email      String
+  age        Int
+  address    String
+  birthDate  DateTime
+  gender     Role
+  isActive   Boolean
+  account    account?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @default(now())
+}
+
+model student {
+  id           Int            @id @default(autoincrement())
+  firstName    String
+  middleName   String
+  lastName     String
+  email        String
+  age          Int
+  address      String
+  birthDate    DateTime
+  gender       Role
+  idCode       String
+  isActive     Boolean
+  studentLevel studentLevel[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now())
+  attendance   attendance[]
+}
+
+model account {
+  id           Int        @id @default(autoincrement())
+  email        String
+  password     String
+  token        String
+  isActive     Boolean
+  isFirstLogin Boolean
+  instructorId Int        @unique
+  instructor   instructor @relation(fields: [instructorId], references: [id])
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @default(now())
+}
+
+model academicLevel {
+  id           Int            @id @default(autoincrement())
+  department   String
+  level        String
+  class        String
+  studentLevel studentLevel[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now())
+}
+
+model academicYear {
+  id           Int            @id @default(autoincrement())
+  monthStart   DateTime
+  yearStart    DateTime
+  monthEnd     DateTime
+  yearEnd      DateTime
+  isCurrent    Boolean
+  studentLevel studentLevel[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now())
+}
+
+model studentLevel {
+  id              Int           @id @default(autoincrement())
+  studentId       Int
+  student         student       @relation(fields: [studentId], references: [id])
+  academicLevelId Int
+  academicLevel   academicLevel @relation(fields: [academicLevelId], references: [id])
+  academicYearId  Int
+  academicYear    academicYear  @relation(fields: [academicYearId], references: [id])
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @default(now())
+}
+
+model subject {
+  id          Int        @id @default(autoincrement())
+  title       String
+  description String
+  code        String
+  isActive    Boolean
+  schedule    schedule[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @default(now())
+}
+
+model schedule {
+  id         Int          @id @default(autoincrement())
+  time       DateTime
+  day        String
+  dayCode    String
+  isActive   Boolean
+  attendance attendance[]
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @default(now())
+  subject    subject?     @relation(fields: [subjectId], references: [id])
+  subjectId  Int?
+}
+
+model attendance {
+  id        Int              @id @default(autoincrement())
+  schedule  schedule[]
+  student   student[]
+  status    AttendanceStatus
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @default(now())
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+enum Gender {
+  MALE
+  FEMALE
+}
+
+enum Role {
+  ADMIN
+  STAFF
+  TEACHER
+}

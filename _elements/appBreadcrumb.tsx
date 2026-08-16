@@ -27,7 +27,7 @@ export function AppBreadcrumb() {
   // Match the current path against known sidebar items
   //   const activeItem = items.find((item) => item.url === pathname);
   const activeItem = sidebarItems.find((item) => item.url === pathname);
-  const segments = pathname.split("/").filter(Boolean);
+  const segments = pathname.split("/dashboard").filter(Boolean);
 
   return (
     <Breadcrumb>

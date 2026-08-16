@@ -9,6 +9,11 @@ import {
   FileBarChart,
   PlusIcon,
   School,
+  LayersPlus,
+  User,
+  UserPen,
+  CalendarCheck,
+  TableOfContents,
 } from "lucide-react"
 
 export type UserRole = "admin" | "teacher" | "student"
@@ -28,20 +33,34 @@ export const sidebarItems: SidebarItem[] = [
     icon: LayoutDashboard,
     roles: ["admin", "teacher", "student"],
   },
- {
-    title: "Academics",
+  {
+    title: "Academic Settings",
     url: "/academics",
     icon: School,
-    roles: ["admin", "teacher", "student"],
+    roles: ["admin"],
+    subItems: [
+      {
+        title: "Academic Levels",
+        url: "/levels",
+        icon: LayersPlus,
+        roles: ["admin"],
+      },
+      {
+        title: "Academic Year",
+        url: "/year",
+        icon: CalendarCheck,
+        roles: ["admin"],
+      },
+    ]
   },
   {
     title: "Students",
     url: "",
-    icon: UserPlus,
+    icon: User,
     roles: ["admin", "teacher"],
     subItems: [
       {
-        title: "Enroll Students",
+        title: "Enroll Student",
         url: "/students/registration",
         icon: PlusIcon,
         roles: ["admin"],
@@ -52,13 +71,59 @@ export const sidebarItems: SidebarItem[] = [
         icon: Users,
         roles: ["admin", "teacher"],
       },
+       {
+        title: "Subject load",
+        url: "/students/subject-load",
+        icon: TableOfContents,
+        roles: ["admin", "teacher"],
+      },
+    ],
+  },
+  {
+    title: "Instructors",
+    url: "",
+    icon: UserPen,
+    roles: ["admin"],
+    subItems: [
+      {
+        title: "Add Instructor",
+        url: "/instructors/registration",
+        icon: PlusIcon,
+        roles: ["admin"],
+      },
+      {
+        title: "Instructor List",
+        url: "/instructors",
+        icon: Users,
+        roles: ["admin", "teacher"],
+      },
     ],
   },
   {
     title: "Subjects",
     url: "/subjects",
     icon: BookOpen,
-    roles: ["admin"],
+    roles: ["admin", "teacher"],
+    subItems: [
+      {
+        title: "Add Subject",
+        url: "/subjects/registration",
+        icon: PlusIcon,
+        roles: ["admin"],
+      },
+      {
+        title: "Subject List",
+        url: "/subjects",
+        icon: Users,
+        roles: ["admin", "teacher"],
+      },
+      {
+        title: "Schedule",
+        url: "/subjects/schedule",
+        icon: CalendarDays,
+        roles: ["admin", "teacher"],
+      },
+    ],
   },
 
   {
@@ -66,20 +131,6 @@ export const sidebarItems: SidebarItem[] = [
     url: "/attendance",
     icon: ClipboardCheck,
     roles: ["teacher"],
-  },
-
-  {
-    title: "Students",
-    url: "/students",
-    icon: GraduationCap,
-    roles: ["teacher"],
-  },
-
-  {
-    title: "Schedule",
-    url: "/schedule",
-    icon: CalendarDays,
-    roles: ["teacher", "admin"],
   },
 
   {

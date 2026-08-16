@@ -98,7 +98,7 @@ export default function StudentsRegistrationPage() {
     <div className="flex flex-col  items-center justify-center gap-6 p-6 animate-float-up">
       <div className="flex w-full max-w-md flex-col ">
         <DynamicCardForm
-          title="Enroll a student"
+          title="Student Enrollment Form"
           description="Fill student's personal information."
           fields={studentFields}
           submitLabel="Next"

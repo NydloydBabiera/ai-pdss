@@ -21,9 +21,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// ---------------------------------------------
-// Types
-// ---------------------------------------------
 
 export type DynamicFieldType =
   | "text"
@@ -55,11 +52,7 @@ export interface DynamicFieldConfig {
 export interface DynamicCardFormProps {
   title: string;
   description?: string;
-  /**
-   * Pass an array of field configs for full control over each input,
-   * OR pass `numberOfInputs` to auto-generate that many generic
-   * text "Field 1", "Field 2"... inputs. If both are given, `fields` wins.
-   */
+ 
   fields?: DynamicFieldConfig[];
   numberOfInputs?: number;
   submitLabel?: string;
@@ -67,9 +60,6 @@ export interface DynamicCardFormProps {
   className?: string;
 }
 
-// ---------------------------------------------
-// Component
-// ---------------------------------------------
 
 export default function DynamicCardForm({
   title,

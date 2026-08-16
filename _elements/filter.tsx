@@ -21,9 +21,10 @@ import { Field, FieldLabel } from "@/components/ui/field";
 
 interface FilterProps {
   filterBy: DataTableColumn<any>[];
+  placeholder: string;
 }
 
-export function Filter({ filterBy }: FilterProps) {
+export function Filter({ filterBy, placeholder }: FilterProps) {
   const [filterText, setFilterText] = useState(
     filterBy[0]?.header.toString() || "",
   );
@@ -31,9 +32,9 @@ export function Filter({ filterBy }: FilterProps) {
   return (
     <div className="grid max-w-sm w-full">
       <Field>
-        <FieldLabel htmlFor="inline-start-input">Filter</FieldLabel>
+        {/* <FieldLabel htmlFor="inline-start-input">Filter</FieldLabel> */}
         <InputGroup>
-          <InputGroupInput placeholder={`Search student by ${filterText}`} />
+          <InputGroupInput placeholder={`${placeholder} ${filterText}`} />
           <InputGroupAddon>
             <SearchIcon />
           </InputGroupAddon>

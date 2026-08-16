@@ -19,7 +19,7 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { getSidebarItems, UserRole } from "@/_config/sidebarConfig";
-import { ChevronRight, GraduationCap } from "lucide-react";
+import { ChevronRight, GraduationCap, User2Icon } from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
@@ -77,7 +77,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
                   return (
                     <Collapsible
                       key={item.title}
-                      defaultOpen={!hasActiveChild}
+                      defaultOpen={hasActiveChild}
                       className="group/collapsible"
                     >
                       <SidebarMenuItem>
@@ -140,9 +140,16 @@ export function AppSidebar({ role }: AppSidebarProps) {
 
       {/* Footer */}
       <SidebarFooter>
-        <div className="px-2 py-2 text-xs text-muted-foreground">
-          Logged in as{" "}
-          <span className="font-medium capitalize text-foreground">{role}</span>
+        <div className="flex items-center gap-3 px-2 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
+            <User2Icon className="size-5" />
+          </div>
+
+          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
+            <span className="text-sm font-semibold">Logged in as </span>
+
+            <span className="text-xs text-muted-foreground">{role}</span>
+          </div>
         </div>
       </SidebarFooter>
     </Sidebar>
