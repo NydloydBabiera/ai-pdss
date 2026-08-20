@@ -1,58 +1,41 @@
 "use client";
+
 import {
-  AcademicLevelData,
-  AcademicLevelType,
-  levelsColumns,
-  levelsFields,
-} from "@/_config/levelsConfig";
-import { DialogField, Fields } from "@/_config/types";
-import { DataTable, DataTableColumn } from "@/_elements/dataTable";
+  academicYearColumns,
+  AcademicYearData,
+  academicYearFields,
+  AcademicYearType,
+} from "@/_config/academicYearConfig";
+import { DataTable } from "@/_elements/dataTable";
 import { FormDialog } from "@/_elements/dialog";
 import { Filter } from "@/_elements/filter";
 import { useLoading } from "@/_elements/loadingScreen";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
-import {
-  createAcademicLevelAction,
-  fetchAcademicLevelsAction,
-} from "./actions";
+import { createAcademicYearAction, fetchAcademicYearAction } from "./actions";
 import { notify } from "@/lib/notifications";
-import { createAcademicLevel } from "@/services/academic.service";
+import { fetchStudents } from "@/services/student.service";
 
-// const levels: Levels[] = [
-//   {
-//     id: 1,
-//     stage: "Junior High School",
-//     level: "Grade 7",
-//     class: "St. Jude",
-//   },
-//   {
-//     id: 2,
-//     stage: "Junior High School",
-//     level: "Grade 8",
-//     class: "St. Francis",
-//   },
-// ];
-
-export default function LevelsPage() {
-  const [levels, setLevels] = useState<AcademicLevelData[]>();
-  const { startLoading, stopLoading } = useLoading();
+export default function AcademicYearPage() {
+  const [academicYears, setAcademicYears] = useState<AcademicYearData[]>();
   const [formOpen, setFormOpen] = useState(false);
+  const { startLoading, stopLoading } = useLoading();
 
-  const fetchAcademicLevels = async () => {
-    startLoading("Loading academic levels");
+  const fetchAcademicYears = async () => {
     try {
-      const result = await fetchAcademicLevelsAction();
+      startLoading("Fetching academic years...");
+
+      const result = await fetchAcademicYearAction();
 
       if (!result.success) {
-        notify.error(result.message as any);
+        notify.error(result.message);
         console.error(result.message);
         return;
       }
 
-      setLevels(result.data);
+      setAcademicYears(result.data);
     } catch (error) {
-      console.error("Failed to fetch students:", error);
+      console.error(error);
       notify.error(error as any);
     } finally {
       stopLoading();
@@ -65,13 +48,12 @@ export default function LevelsPage() {
     startLoading("Creating academic level...");
 
     try {
-      const level: AcademicLevelType = {
-        department: String(values.department ?? ""),
-        level: String(values.level ?? ""),
-        class: String(values.class ?? ""),
+      const academicYear: AcademicYearType = {
+        start: new Date(values.start as string),
+        end: new Date(values.end as string),
       };
 
-      const result = await createAcademicLevelAction(level);
+      const result = await createAcademicYearAction(academicYear);
 
       console.log("🚀 ~ handleSubmit ~ result:", result);
 
@@ -82,7 +64,7 @@ export default function LevelsPage() {
       }
 
       setFormOpen(false);
-      fetchAcademicLevels();
+      fetchAcademicYears();
       console.log("Academic level created:", result.data);
     } catch (error) {
       console.error(error);
@@ -93,20 +75,23 @@ export default function LevelsPage() {
   };
 
   useEffect(() => {
-    fetchAcademicLevels();
+    fetchAcademicYears();
   }, []);
 
   return (
     <div className="p-6">
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
-          <Filter placeholder="Search level by" filterBy={levelsColumns} />
+          <Filter
+            placeholder="Search level by"
+            filterBy={academicYearColumns}
+          />
           <FormDialog
             open={formOpen}
-            trigger={<Button>ADD ACADEMIC LEVELS</Button>}
+            trigger={<Button>START NEW ACADEMIC YEAR</Button>}
             title="Add Academic Level"
             description="Fill in the details to add a new academic level."
-            fields={levelsFields}
+            fields={academicYearFields}
             onSubmit={(values) => {
               console.log("🚀 ~ LevelsPage ~ values:", values);
               handleSubmit(values);
@@ -114,7 +99,11 @@ export default function LevelsPage() {
             onOpenChange={setFormOpen}
           />
         </div>
-        <DataTable columns={levelsColumns} data={levels ?? []} rowKey="id" />
+        <DataTable
+          columns={academicYearColumns}
+          data={academicYears ?? []}
+          rowKey="id"
+        />
       </div>
     </div>
   );

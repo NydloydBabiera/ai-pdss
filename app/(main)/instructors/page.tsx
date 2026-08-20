@@ -1,58 +1,62 @@
-"use client"
+"use client";
 import {
-  Instructor,
   instructorColumns,
-  instructorFields,
+  InstructorData,
 } from "@/_config/instructorConfig";
 import { DataTable } from "@/_elements/dataTable";
-import { FormDialog } from "@/_elements/dialog";
 import { Filter } from "@/_elements/filter";
+import { useLoading } from "@/_elements/loadingScreen";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { fetchInstructorsActions } from "./registration/actions";
+import { notify } from "@/lib/notifications";
 
-const instructors: Instructor[] = [
-  {
-    id: 1,
-    name: "Instructor 1",
-    email: "test@gmail.com",
-    age: 28,
-    gender: "Male",
-    birthDate: "1995-01-01",
-    isActive: true,
-  },
-  {
-    id: 2,
-    name: "Instructor 2",
-    email: "test@gmail.com",
-    age: 28,
-    gender: "Male",
-    birthDate: "1995-01-01",
-    isActive: true,
-  },
-];
 
 export default function InstructorsPage() {
-
-  return (
-    <div className="p-6">
-      <div className="flex flex-col gap-4 ">
-        <div className="flex items-center gap-2">
-          <Filter
-            placeholder="Search instructor by"
-            filterBy={instructorColumns}
-          />
-          <FormDialog
-            trigger={<Button>Add Instructor</Button>}
-            title="Add Instructor"
-            description="Fill in the details to add a new instructor."
-            fields={instructorFields}
-            onSubmit={(values) => {
-              console.log("🚀 ~ InstructorsPage ~ values:", values);
-              // Handle form submission
-            }}
-          />
-        </div>
-        <DataTable columns={instructorColumns} data={instructors} rowKey="id" />
-      </div>
-    </div>
-  );
+ const router = useRouter();
+   const [instructors, setInstructors] = useState<InstructorData[]>();
+   const { startLoading, stopLoading } = useLoading();
+ 
+   const fetchStudents = async () => {
+     try {
+       startLoading("Loading documents...");
+ 
+       const result = await fetchInstructorsActions();
+ 
+       if (!result.success) {
+         notify.error(result.message as any);
+         console.error(result.message as any);
+         return;
+       }
+       setInstructors(result.data);
+     } catch (error) {
+      
+       notify.error(error as any);
+       console.error("Failed to fetch students:", error);
+     } finally {
+       stopLoading();
+     }
+   };
+   useEffect(() => {
+     fetchStudents();
+   }, []);
+ 
+   return (
+     <div className="p-6">
+       <div className="flex flex-col gap-4 ">
+         <div className="flex items-center gap-2">
+           <Filter placeholder="Search student by" filterBy={instructorColumns} />
+           <Button
+             onClick={() => {
+               router.push("/instructors/registration");
+             }}
+           >
+             Add Instructor
+           </Button>
+         </div>
+         <DataTable columns={instructorColumns} data={instructors ?? []} rowKey="id" />
+       </div>
+     </div>
+   );
 }

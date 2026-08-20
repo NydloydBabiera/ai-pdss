@@ -1,23 +1,22 @@
+import { AcademicYearData, AcademicYearType } from "@/_config/academicYearConfig";
+import { AcademicLevelData, AcademicLevelType } from "@/_config/levelsConfig";
 import { prisma } from "@/lib/prisma";
 
-type AcademicYearType = {
-    monthStart: Date;
-    yearStart: Date;
-    monthEnd: Date;
-    yearEnd: Date;
-    isCurrent: boolean;
-}
 
 
 
 export async function createAcademicYear(academicYear: AcademicYearType): Promise<AcademicYearType> {
+    console.log("🚀 ~ createAcademicYear ~ academicYear:", academicYear)
     const setup = await prisma.academicYear.create({
-        data: academicYear
+        data: {
+            ...academicYear,
+            isCurrent: true
+        }
     })
     return setup;
 }
 
-export async function fetchAcademicYear(): Promise<AcademicYearType[]> {
+export async function fetchAcademicYear(): Promise<AcademicYearData[]> {
     const data = await prisma.academicYear.findMany({
         orderBy: {
             createdAt: "asc"
@@ -27,7 +26,7 @@ export async function fetchAcademicYear(): Promise<AcademicYearType[]> {
     return data
 }
 
-export async function updateAcademicYear(id: number, academicYear: AcademicYearType): Promise<AcademicYearType> {
+export async function updateAcademicYear(id: number, academicYear: AcademicYearType): Promise<AcademicYearData> {
     const data = await prisma.academicYear.update({
         where: {
             id: id,
@@ -48,20 +47,16 @@ export async function deleteAcademicYear(id: number): Promise<Boolean> {
     return true;
 }
 
-type AcademicLevelType = {
-    department: string;
-    level: string;
-    class: string;
-}
 
-export async function createAcademicLevelType(academicLevel: AcademicLevelType): Promise<AcademicLevelType> {
+
+export async function createAcademicLevel(academicLevel: AcademicLevelType): Promise<AcademicLevelData> {
     const setup = await prisma.academicLevel.create({
         data: academicLevel
     })
     return setup;
 }
 
-export async function fetchAcademicLevels(): Promise<AcademicLevelType[]> {
+export async function fetchAcademicLevels(): Promise<AcademicLevelData[]> {
     const data = await prisma.academicLevel.findMany({
         orderBy: {
             createdAt: "asc"
@@ -70,7 +65,7 @@ export async function fetchAcademicLevels(): Promise<AcademicLevelType[]> {
     return data
 }
 
-export async function updateAcademicLevel(id: number, academicYear: AcademicYearType): Promise<AcademicLevelType> {
+export async function updateAcademicLevel(id: number, academicYear: AcademicYearType): Promise<AcademicLevelData> {
     const data = await prisma.academicLevel.update({
         where: {
             id: id,

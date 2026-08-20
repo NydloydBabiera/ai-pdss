@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
+
 export type DataTableColumn<T> = {
   key: keyof T | string;
   header: string;

@@ -178,7 +178,7 @@ export function FormDialog({
                */
               if (fieldType === "dropdown") {
                 return (
-                  <div key={field.name} className="space-y-2">
+                  <div key={field.name} className="w-full space-y-2">
                     <Label htmlFor={field.name}>
                       {field.label}
 

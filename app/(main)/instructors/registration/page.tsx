@@ -1,23 +1,22 @@
 "use client";
+import { instructorFields, InstructorType } from "@/_config/instructorConfig";
 import DynamicCardForm from "@/_elements/cardForm";
-import React, { useState } from "react";
-import { createStudentAction } from "./action";
-import { studentFields, StudentFieldType } from "@/_config/studentConfig";
-import { Gender } from "@/generated/prisma/enums";
 import { useLoading } from "@/_elements/loadingScreen";
+import { Gender } from "@/generated/prisma/enums";
+import { createInstructorAction } from "./actions";
 import { notify } from "@/lib/notifications";
+import { useRouter } from "next/navigation";
 
-export default function StudentsRegistrationPage() {
-  const [isNext, setIsNext] = useState(false);
-  const [student, setStudent] = useState<StudentFieldType | undefined>();
+export default function InstructorRegistrationPage() {
   const { startLoading, stopLoading } = useLoading();
+  const router = useRouter();
 
   const handleSubmit = async (values: Record<string, string>) => {
-    console.log("🚀 ~ handleSubmit ~ values:", values)
+    console.log("🚀 ~ handleSubmit ~ values:", values);
     startLoading("Creating student...");
-    
+
     try {
-      const student: StudentFieldType = {
+      const instructor: InstructorType = {
         firstName: values.firstName,
         middleName: values.middleName,
         lastName: values.lastName,
@@ -28,19 +27,19 @@ export default function StudentsRegistrationPage() {
         gender: values.gender as Gender,
       };
 
-      const result = await createStudentAction(student);
-      console.log("🚀 ~ handleSubmit ~ result:", result)
+      const result = await createInstructorAction(instructor);
+      console.log("🚀 ~ handleSubmit ~ result:", result);
 
       if (!result.success) {
-        notify.error(result.message)
+        notify.error(result.message as any);
         console.error(result.message);
         return;
       }
 
-      console.log("Student created:", result.data);
+      router.push("/instructors");
     } catch (error) {
       console.error(error);
-       notify.error(error as any)
+      notify.error(error as any);
     } finally {
       stopLoading();
     }
@@ -50,9 +49,9 @@ export default function StudentsRegistrationPage() {
     <div className="flex flex-col  items-center justify-center gap-6 p-6 animate-float-up">
       <div className="flex w-full max-w-md flex-col ">
         <DynamicCardForm
-          title="Student Enrollment Form"
-          description="Fill student's personal information."
-          fields={studentFields}
+          title="Instructor Registration"
+          description="Fill instructor's personal information."
+          fields={instructorFields}
           submitLabel="Submit"
           onSubmit={handleSubmit}
         />

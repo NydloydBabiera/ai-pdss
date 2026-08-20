@@ -13,7 +13,7 @@ export type DialogFieldType =
     | "date"
     | "dropdown"
     | "radio"
-    | "checkbox";
+    | "checkbox" | "month";
 
 export type DialogField = {
     name: string;

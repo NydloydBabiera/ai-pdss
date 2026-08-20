@@ -21,7 +21,7 @@ model instructor {
   age        Int
   address    String
   birthDate  DateTime
-  gender     Role
+  gender     Gender
   isActive   Boolean
   account    account?
   createdAt  DateTime @default(now())
@@ -37,13 +37,18 @@ model student {
   age          Int
   address      String
   birthDate    DateTime
-  gender       Role
-  idCode       String
+  gender       Gender
+  idCode       String @unique
   isActive     Boolean
   studentLevel studentLevel[]
   createdAt    DateTime       @default(now())
   updatedAt    DateTime       @default(now())
   attendance   attendance[]
+}
+
+model studentSequence {
+  year       Int @id
+  lastNumber Int @default(0)
 }
 
 model account {
@@ -54,9 +59,21 @@ model account {
   isActive     Boolean
   isFirstLogin Boolean
   instructorId Int        @unique
+  Role         Role
   instructor   instructor @relation(fields: [instructorId], references: [id])
   createdAt    DateTime   @default(now())
   updatedAt    DateTime   @default(now())
+  sessions   AccountSession[]
+}
+
+model AccountSession {
+  id        Int      @id @default(autoincrement())
+  accountId Int
+  tokenHash String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  account account @relation(fields: [accountId], references: [id])
 }
 
 model academicLevel {
@@ -71,10 +88,8 @@ model academicLevel {
 
 model academicYear {
   id           Int            @id @default(autoincrement())
-  monthStart   DateTime
-  yearStart    DateTime
-  monthEnd     DateTime
-  yearEnd      DateTime
+  start        DateTime
+  end          DateTime
   isCurrent    Boolean
   studentLevel studentLevel[]
   createdAt    DateTime       @default(now())

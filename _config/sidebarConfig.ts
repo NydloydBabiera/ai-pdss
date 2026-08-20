@@ -47,7 +47,7 @@ export const sidebarItems: SidebarItem[] = [
       },
       {
         title: "Academic Year",
-        url: "/year",
+        url: "/academicYear",
         icon: CalendarCheck,
         roles: ["admin"],
       },
@@ -60,7 +60,7 @@ export const sidebarItems: SidebarItem[] = [
     roles: ["admin", "teacher"],
     subItems: [
       {
-        title: "Enroll Student",
+        title: "Student Registration",
         url: "/students/registration",
         icon: PlusIcon,
         roles: ["admin"],
