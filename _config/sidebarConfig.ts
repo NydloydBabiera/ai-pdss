@@ -106,13 +106,7 @@ export const sidebarItems: SidebarItem[] = [
     roles: ["admin", "teacher"],
     subItems: [
       {
-        title: "Add Subject",
-        url: "/subjects/registration",
-        icon: PlusIcon,
-        roles: ["admin"],
-      },
-      {
-        title: "Subject List",
+        title: "Subjects",
         url: "/subjects",
         icon: Users,
         roles: ["admin", "teacher"],

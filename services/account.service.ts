@@ -1,18 +1,20 @@
+import { AccountData, AccountType, LoginData } from "@/_config/accountConfig";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { generateSessionToken, hashToken } from "@/lib/auth/token";
 import { prisma } from "@/lib/prisma";
+import { cookies } from "next/headers";
 
-type Account = {
-    email: string;
-    password: string;
-}
+// type Account = {
+//     email: string;
+//     password: string;
+// }
 
-type Auth = {
-    token: string;
-    expiresAt: Date;
-}
-export async function updatePassword(id: number, account: Account): Promise<Account> {
-    const instructor = await prisma.account.update({
+// type Auth = {
+//     token: string;
+//     expiresAt: Date;
+// }
+export async function updatePassword(id: number, account: AccountType): Promise<AccountData> {
+    const data = await prisma.account.update({
         where: {
             id: id
         },
@@ -20,11 +22,15 @@ export async function updatePassword(id: number, account: Account): Promise<Acco
             password: await hashPassword(account.password)
         }
     })
-
-    return instructor
+    const result = {
+        id: data.id,
+        email: data.email,
+        role: data.Role,
+    }
+    return result
 }
 
-export async function login(account: Account): Promise<Auth> {
+export async function login(account: AccountType): Promise<LoginData> {
 
     const user = await prisma.account.findFirst({
         where: {
@@ -66,4 +72,41 @@ export async function login(account: Account): Promise<Auth> {
         token,
         expiresAt,
     };
+}
+
+
+export async function getCurrentUser(): Promise<AccountData | undefined> {
+    const cookieStore = await cookies();
+
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+        return;
+    }
+
+    const tokenHash = hashToken(token);
+
+    const session = await prisma.accountSession.findFirst({
+        where: {
+            tokenHash,
+            expiresAt: {
+                gt: new Date(),
+            },
+        },
+        include: {
+            account: true,
+        },
+    });
+
+    if (!session) {
+        return;
+    }
+
+    const result = {
+        id: session.account.id,
+        email: session.account.email,
+        role: session.account.Role,
+    }
+
+    return result;
 }
