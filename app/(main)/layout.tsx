@@ -1,3 +1,4 @@
+import { AccountData } from "@/_config/accountConfig";
 import { AppBreadcrumb } from "@/_elements/appBreadcrumb";
 import { AppSidebar } from "@/_elements/appSidebar";
 import { AuthProvider } from "@/_elements/authProvider";
@@ -23,6 +24,7 @@ export default async function ProtectedMain({
         id: user.id,
         email: user.email,
         role: user.role,
+        instructor: user.instructor,
       }
     : null;
   console.log("🚀 ~ ProtectedMain ~ authUser:", authUser);
@@ -34,7 +36,7 @@ export default async function ProtectedMain({
   return (
     <AuthProvider user={authUser}>
       <SidebarProvider defaultOpen={defaultOpen}>
-        <AppSidebar role="admin" />
+        <AppSidebar user={user} />
         <LoadingProvider>
           <main className="min-h-screen w-full app-content">
             <div className="flex h-14 items-center gap-3 border-b px-4">

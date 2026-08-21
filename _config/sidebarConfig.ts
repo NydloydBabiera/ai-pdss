@@ -1,3 +1,4 @@
+import { Role } from "@/generated/prisma/enums"
 import {
   LayoutDashboard,
   UserPlus,
@@ -16,7 +17,7 @@ import {
   TableOfContents,
 } from "lucide-react"
 
-export type UserRole = "admin" | "teacher" | "student"
+export type UserRole = Role
 
 export type SidebarItem = {
   title: string
@@ -31,25 +32,25 @@ export const sidebarItems: SidebarItem[] = [
     title: "Dashboard",
     url: "/",
     icon: LayoutDashboard,
-    roles: ["admin", "teacher", "student"],
+    roles: ["ADMIN", "STAFF", "TEACHER"],
   },
   {
     title: "Academic Settings",
     url: "/academics",
     icon: School,
-    roles: ["admin"],
+    roles: ["ADMIN"],
     subItems: [
       {
         title: "Academic Levels",
         url: "/levels",
         icon: LayersPlus,
-        roles: ["admin"],
+        roles: ["ADMIN"],
       },
       {
         title: "Academic Year",
         url: "/academicYear",
         icon: CalendarCheck,
-        roles: ["admin"],
+        roles: ["ADMIN"],
       },
     ]
   },
@@ -57,25 +58,19 @@ export const sidebarItems: SidebarItem[] = [
     title: "Students",
     url: "",
     icon: User,
-    roles: ["admin", "teacher"],
+    roles: ["ADMIN", "ADMIN"],
     subItems: [
-      {
-        title: "Student Registration",
-        url: "/students/registration",
-        icon: PlusIcon,
-        roles: ["admin"],
-      },
       {
         title: "Student List",
         url: "/students",
         icon: Users,
-        roles: ["admin", "teacher"],
+        roles: ["ADMIN", "TEACHER"],
       },
-       {
+      {
         title: "Subject load",
         url: "/students/subject-load",
         icon: TableOfContents,
-        roles: ["admin", "teacher"],
+        roles: ["ADMIN", "TEACHER"],
       },
     ],
   },
@@ -83,19 +78,13 @@ export const sidebarItems: SidebarItem[] = [
     title: "Instructors",
     url: "",
     icon: UserPen,
-    roles: ["admin"],
+    roles: ["ADMIN"],
     subItems: [
-      {
-        title: "Add Instructor",
-        url: "/instructors/registration",
-        icon: PlusIcon,
-        roles: ["admin"],
-      },
       {
         title: "Instructor List",
         url: "/instructors",
         icon: Users,
-        roles: ["admin", "teacher"],
+        roles: ["ADMIN", "TEACHER"],
       },
     ],
   },
@@ -103,19 +92,19 @@ export const sidebarItems: SidebarItem[] = [
     title: "Subjects",
     url: "/subjects",
     icon: BookOpen,
-    roles: ["admin", "teacher"],
+    roles: ["ADMIN", "TEACHER"],
     subItems: [
       {
         title: "Subjects",
         url: "/subjects",
         icon: Users,
-        roles: ["admin", "teacher"],
+        roles: ["ADMIN", "TEACHER"],
       },
       {
         title: "Schedule",
         url: "/subjects/schedule",
         icon: CalendarDays,
-        roles: ["admin", "teacher"],
+        roles: ["ADMIN", "TEACHER"],
       },
     ],
   },
@@ -124,18 +113,18 @@ export const sidebarItems: SidebarItem[] = [
     title: "Attendance",
     url: "/attendance",
     icon: ClipboardCheck,
-    roles: ["teacher"],
+    roles: ["TEACHER"],
   },
 
   {
     title: "Reports",
     url: "/reports",
     icon: FileBarChart,
-    roles: ["admin", "teacher"],
+    roles: ["ADMIN", "TEACHER"],
   },
 ]
 
-export function getSidebarItems(role: UserRole) {
+export function getSidebarItems(role: Role) {
   return sidebarItems
     .filter((item) => item.roles.includes(role))
     .map((item) => ({

@@ -1,4 +1,5 @@
-import { AccountData, AccountType, LoginData } from "@/_config/accountConfig";
+import "server-only";
+import { AccountData, AccountType, LoginData, UpdatePasswordType } from "@/_config/accountConfig";
 import { hashPassword, verifyPassword } from "@/lib/auth/password";
 import { generateSessionToken, hashToken } from "@/lib/auth/token";
 import { prisma } from "@/lib/prisma";
@@ -13,13 +14,14 @@ import { cookies } from "next/headers";
 //     token: string;
 //     expiresAt: Date;
 // }
-export async function updatePassword(id: number, account: AccountType): Promise<AccountData> {
+export async function updatePassword(account: UpdatePasswordType): Promise<AccountData> {
     const data = await prisma.account.update({
         where: {
-            id: id
+            id: account.id
         },
         data: {
-            password: await hashPassword(account.password)
+            password: await hashPassword(account.newPassword),
+            isFirstLogin: false,
         }
     })
     const result = {
@@ -71,6 +73,8 @@ export async function login(account: AccountType): Promise<LoginData> {
     return {
         token,
         expiresAt,
+        isFirstLogin: user.isFirstLogin,
+        accountId: user?.id
     };
 }
 
@@ -94,7 +98,11 @@ export async function getCurrentUser(): Promise<AccountData | undefined> {
             },
         },
         include: {
-            account: true,
+            account: {
+                include: {
+                    instructor: true
+                }
+            },
         },
     });
 
@@ -106,7 +114,23 @@ export async function getCurrentUser(): Promise<AccountData | undefined> {
         id: session.account.id,
         email: session.account.email,
         role: session.account.Role,
+        instructor: session.account.instructor
     }
 
     return result;
+}
+
+export async function logOut(token: string) {
+    const tokenHash = hashToken(token);
+
+    await prisma.accountSession.deleteMany({
+        where: {
+            tokenHash,
+        },
+    });
+
+    return {
+        success: true,
+        message: "Logged out successfully",
+    };
 }

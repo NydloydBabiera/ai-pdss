@@ -19,13 +19,31 @@ import {
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar";
 import { getSidebarItems, UserRole } from "@/_config/sidebarConfig";
-import { ChevronRight, GraduationCap, User2Icon } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronsUpDown,
+  GraduationCap,
+  LogOutIcon,
+  SettingsIcon,
+  User2Icon,
+} from "lucide-react";
 import {
   Collapsible,
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { useState } from "react";
+import { AccountData } from "@/_config/accountConfig";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { NavUser } from "./sidebarUser";
 
 // import {
 //   getSidebarItems,
@@ -33,13 +51,13 @@ import { useState } from "react";
 // } from "@/config/sidebar"
 
 interface AppSidebarProps {
-  role: UserRole;
+  user: AccountData;
 }
 
-export function AppSidebar({ role }: AppSidebarProps) {
+export function AppSidebar({ user }: AppSidebarProps) {
   const pathname = usePathname();
 
-  const items = getSidebarItems(role);
+  const items = getSidebarItems(user?.role);
 
   return (
     <Sidebar variant="sidebar" collapsible="icon">
@@ -141,17 +159,7 @@ export function AppSidebar({ role }: AppSidebarProps) {
 
       {/* Footer */}
       <SidebarFooter>
-        <div className="flex items-center gap-3 px-2 py-2 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0">
-          <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <User2Icon className="size-5" />
-          </div>
-
-          <div className="flex flex-col group-data-[collapsible=icon]:hidden">
-            <span className="text-sm font-semibold">Logged in as </span>
-
-            <span className="text-xs text-muted-foreground">{role}</span>
-          </div>
-        </div>
+        <NavUser instructor={user} />
       </SidebarFooter>
     </Sidebar>
   );

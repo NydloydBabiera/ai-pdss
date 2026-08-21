@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import { LoadingProvider } from "@/_elements/loadingScreen";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,6 +27,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="font-sans antialiased">
         {/* <GlobalLoadingModal /> */}
+        <Toaster />
         <LoadingProvider>{children}</LoadingProvider>
 
         {/* <Notification /> */}
