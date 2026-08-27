@@ -20,7 +20,7 @@ jobs:
           script: |
             set -e
 
-            cd /var/www/my-app
+            cd /var/web/ai-pdss
 
             # Get latest master branch
             git fetch origin
