@@ -1,7 +1,32 @@
 "use server"
 import { StudentDataType, StudentFieldType } from "@/_config/studentConfig";
-import { Gender } from "@/generated/prisma/enums";
-import { createStudent, fetchStudents } from "@/services/student.service";
+import { createStudent, deleteStudent, fetchStudent, fetchStudents, updateStudent } from "@/services/student.service";
+
+const errorMessage = (error: unknown) => error instanceof Error ? error.message : "Something went wrong.";
+
+export async function fetchStudentAction(id: number) {
+    try {
+        return { success: true as const, message: "Student fetched successfully.", data: await fetchStudent(id) };
+    } catch (error) {
+        return { success: false as const, message: errorMessage(error) };
+    }
+}
+
+export async function updateStudentAction(id: number, data: StudentFieldType) {
+    try {
+        return { success: true as const, message: "Student updated successfully.", data: await updateStudent(id, data) };
+    } catch (error) {
+        return { success: false as const, message: errorMessage(error) };
+    }
+}
+
+export async function deleteStudentAction(id: number) {
+    try {
+        return { success: true as const, message: "Student deleted successfully.", data: await deleteStudent(id) };
+    } catch (error) {
+        return { success: false as const, message: errorMessage(error) };
+    }
+}
 
 
 

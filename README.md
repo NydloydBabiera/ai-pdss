@@ -25,6 +25,8 @@ This project uses [`next/font`](https://nextjs.org/docs/app/building-your-applic
 npx prisma migrate dev --name init
 npx prisma generate
 npx prisma studio
+npm run db:seed
+npm run db:deploy
 ```
 ## Deploy on Vercel
 

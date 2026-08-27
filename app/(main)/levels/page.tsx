@@ -1,99 +1,113 @@
 "use client";
+
 import {
   AcademicLevelData,
   AcademicLevelType,
   levelsColumns,
   levelsFields,
 } from "@/_config/levelsConfig";
-import { DialogField, Fields } from "@/_config/types";
 import { DataTable, DataTableColumn } from "@/_elements/dataTable";
+import { DataTableActions } from "@/_elements/dataTableActions";
 import { FormDialog } from "@/_elements/dialog";
 import { Filter } from "@/_elements/filter";
 import { useLoading } from "@/_elements/loadingScreen";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
+import { notify } from "@/lib/notifications";
+import { useCallback, useEffect, useState } from "react";
 import {
   createAcademicLevelAction,
+  deleteAcademicLevelAction,
   fetchAcademicLevelsAction,
+  updateAcademicLevelAction,
 } from "./actions";
-import { notify } from "@/lib/notifications";
-import { createAcademicLevel } from "@/services/academic.service";
-
-// const levels: Levels[] = [
-//   {
-//     id: 1,
-//     stage: "Junior High School",
-//     level: "Grade 7",
-//     class: "St. Jude",
-//   },
-//   {
-//     id: 2,
-//     stage: "Junior High School",
-//     level: "Grade 8",
-//     class: "St. Francis",
-//   },
-// ];
 
 export default function LevelsPage() {
-  const [levels, setLevels] = useState<AcademicLevelData[]>();
-  const { startLoading, stopLoading } = useLoading();
+  const [levels, setLevels] = useState<AcademicLevelData[]>([]);
+  const [selected, setSelected] = useState<AcademicLevelData>();
   const [formOpen, setFormOpen] = useState(false);
+  const { startLoading, stopLoading } = useLoading();
 
-  const fetchAcademicLevels = async () => {
-    startLoading("Loading academic levels");
+  const load = useCallback(async () => {
+    startLoading("Loading academic levels...");
     try {
       const result = await fetchAcademicLevelsAction();
-
-      if (!result.success) {
-        notify.error(result.message as any);
-        console.error(result.message);
-        return;
-      }
-
-      setLevels(result.data);
-    } catch (error) {
-      console.error("Failed to fetch students:", error);
-      notify.error(error as any);
+      if (!result.success) return notify.error(String(result.message));
+      setLevels(result.data ?? []);
     } finally {
       stopLoading();
     }
-  };
+  }, [startLoading, stopLoading]);
 
   const handleSubmit = async (values: Record<string, string | boolean>) => {
-    console.log("🚀 ~ handleSubmit ~ values:", values);
-
-    startLoading("Creating academic level...");
-
+    startLoading(
+      selected ? "Updating academic level..." : "Creating academic level...",
+    );
     try {
-      const level: AcademicLevelType = {
-        department: String(values.department ?? ""),
-        level: String(values.level ?? ""),
-        class: String(values.class ?? ""),
+      const data: AcademicLevelType = {
+        department: String(values.department),
+        level: String(values.level),
+        class: String(values.class),
       };
-
-      const result = await createAcademicLevelAction(level);
-
-      console.log("🚀 ~ handleSubmit ~ result:", result);
-
-      if (!result.success) {
-        notify.error(result.message as any);
-        console.error(result.message);
-        return;
-      }
-
+      const result = selected
+        ? await updateAcademicLevelAction(selected.id, data)
+        : await createAcademicLevelAction(data);
+      if (!result.success) return notify.error(String(result.message));
+      notify.success(String(result.message));
       setFormOpen(false);
-      fetchAcademicLevels();
-      console.log("Academic level created:", result.data);
-    } catch (error) {
-      console.error(error);
-      notify.error(error as any);
+      setSelected(undefined);
+      await load();
     } finally {
       stopLoading();
     }
   };
 
+  const handleDelete = async (row: AcademicLevelData) => {
+    if (
+      !window.confirm(
+        `Delete ${row.level} ${row.class} and its student assignments?`,
+      )
+    )
+      return;
+    startLoading("Deleting academic level...");
+    try {
+      const result = await deleteAcademicLevelAction(row.id);
+      if (!result.success) return notify.error(result.message);
+      setLevels((current) => current.filter((item) => item.id !== row.id));
+      notify.success(result.message);
+    } finally {
+      stopLoading();
+    }
+  };
+
+  const columns: DataTableColumn<AcademicLevelData>[] = [
+    ...levelsColumns,
+    {
+      key: "actions",
+      header: "Actions",
+      className: "w-12 text-right",
+      render: (row) => (
+        <DataTableActions
+          label={`${row.level} ${row.class}`}
+          onEdit={() => {
+            setSelected(row);
+            setFormOpen(true);
+          }}
+          onDelete={() => void handleDelete(row)}
+        />
+      ),
+    },
+  ];
+  const fields = selected
+    ? levelsFields.map((field) => ({
+        ...field,
+        defaultValue: String(
+          selected[field.name as keyof AcademicLevelData] ?? "",
+        ),
+      }))
+    : levelsFields;
+
   useEffect(() => {
-    fetchAcademicLevels();
+    void load();
   }, []);
 
   return (
@@ -102,19 +116,21 @@ export default function LevelsPage() {
         <div className="flex items-center gap-2">
           <Filter placeholder="Search level by" filterBy={levelsColumns} />
           <FormDialog
+            key={selected?.id ?? "new"}
             open={formOpen}
-            trigger={<Button>ADD ACADEMIC LEVELS</Button>}
-            title="Add Academic Level"
-            description="Fill in the details to add a new academic level."
-            fields={levelsFields}
-            onSubmit={(values) => {
-              console.log("🚀 ~ LevelsPage ~ values:", values);
-              handleSubmit(values);
+            trigger={<Button>ADD ACADEMIC LEVEL</Button>}
+            title={selected ? "Edit Academic Level" : "Add Academic Level"}
+            description="Fill in the academic level details."
+            fields={fields}
+            submitText={selected ? "Save Changes" : "Submit"}
+            onSubmit={handleSubmit}
+            onOpenChange={(open) => {
+              setFormOpen(open);
+              if (!open) setSelected(undefined);
             }}
-            onOpenChange={setFormOpen}
           />
         </div>
-        <DataTable columns={levelsColumns} data={levels ?? []} rowKey="id" />
+        <DataTable columns={columns} data={levels} rowKey="id" />
       </div>
     </div>
   );

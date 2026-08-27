@@ -33,10 +33,10 @@ export async function isInstructorEmailExists(data: any) {
     }
 }
 
-export async function isInstructorDataExist(data: any) {
+export async function isInstructorDataExist(id: number) {
     const student = await prisma.instructor.findFirst({
         where: {
-            id: data?.id
+            id
         }
     })
 

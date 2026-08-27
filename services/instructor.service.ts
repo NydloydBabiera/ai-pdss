@@ -1,27 +1,9 @@
-import { Gender, Role } from "@/generated/prisma/enums";
+import { Role } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { isInstructorDataExist, isInstructorEmailExists, isInstructorExists } from "./business/instructor.business";
 import { hashPassword } from "@/lib/auth/password";
 import { InstructorData, InstructorType } from "@/_config/instructorConfig";
 
-// type InstructorType = {
-//     id: number;
-//     firstName: string;
-//     middleName: string;
-//     lastName: string;
-//     email: string;
-//     age: number;
-//     birthDate: Date;
-//     gender: Gender;
-//     address: string;
-//     isActive: boolean;
-// }
-
-// type ReturnMessage = {
-//     status: string;
-//     message: string;
-//     data: InstructorType;
-// }
 
 
 
@@ -74,29 +56,53 @@ export async function fetchInstructors(): Promise<InstructorData[]> {
     return instructors ?? []
 }
 
+export async function fetchInstructor(id: number): Promise<InstructorData> {
+    await isInstructorDataExist(id)
+
+    return prisma.instructor.findUniqueOrThrow({ where: { id } })
+}
+
 export async function updateInstructor(id: number, instructorType: InstructorType): Promise<InstructorData> {
 
     await isInstructorDataExist(id)
 
-    const instructor = await prisma.instructor.update({
-        where: {
-            id: id
-        },
-        data: instructorType
-    })
+    return prisma.$transaction(async (tx) => {
+        const instructor = await tx.instructor.update({
+            where: { id },
+            data: instructorType
+        })
 
-    return instructor;
+        await tx.account.updateMany({
+            where: { instructorId: id },
+            data: { email: instructorType.email }
+        })
+
+        return instructor
+    })
 }
 
 export async function deleteInstructor(id: number): Promise<InstructorData> {
 
     await isInstructorDataExist(id)
 
-    const deletedData = await prisma.instructor.delete({
-        where: {
-            id: id
-        }
-    })
+    return prisma.$transaction(async (tx) => {
+        const account = await tx.account.findUnique({
+            where: { instructorId: id },
+            select: { id: true }
+        })
 
-    return deletedData;
+        if (account) {
+            await tx.accountSession.deleteMany({
+                where: { accountId: account.id }
+            })
+
+            await tx.account.delete({
+                where: { id: account.id }
+            })
+        }
+
+        return tx.instructor.delete({
+            where: { id }
+        })
+    })
 };

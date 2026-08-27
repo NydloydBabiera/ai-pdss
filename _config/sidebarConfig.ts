@@ -102,7 +102,7 @@ export const sidebarItems: SidebarItem[] = [
       },
       {
         title: "Schedule",
-        url: "/subjects/schedule",
+        url: "/schedule",
         icon: CalendarDays,
         roles: ["ADMIN", "TEACHER"],
       },

@@ -1,76 +1,85 @@
 "use client";
 
-import { DataTable, DataTableColumn } from "@/_elements/dataTable";
-import { Filter } from "@/_elements/filter";
-import { FormDialog } from "@/_elements/dialog";
-import { Button } from "@/components/ui/button";
 import { studentColumns, StudentDataType } from "@/_config/studentConfig";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { DataTable, DataTableColumn } from "@/_elements/dataTable";
+import { DataTableActions } from "@/_elements/dataTableActions";
+import { Filter } from "@/_elements/filter";
 import { useLoading } from "@/_elements/loadingScreen";
-import { fetchStudentsAction } from "./registration/action";
+import { Button } from "@/components/ui/button";
 import { notify } from "@/lib/notifications";
-
-// const users: User[] = [
-//   {
-//     id: 1,
-//     name: "John Doe",
-//     email: "john@example.com",
-//     gradeLevel: "8",
-//     section: "St. Jude",
-//     status: "Active",
-//   },
-//   {
-//     id: 2,
-//     name: "Jane Smith",
-//     email: "jane@example.com",
-//     gradeLevel: "9",
-//     section: "St. Jude",
-//     status: "Inactive",
-//   },
-// ];
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import {
+  deleteStudentAction,
+  fetchStudentsAction,
+} from "./registration/action";
 
 export default function StudentsPage() {
-  const router = useRouter();
-  const [students, setStudents] = useState<StudentDataType[]>();
+  const [students, setStudents] = useState<StudentDataType[]>([]);
   const { startLoading, stopLoading } = useLoading();
+  const router = useRouter();
 
-  const fetchStudents = async () => {
+  const load = useCallback(async () => {
+    startLoading("Loading students...");
     try {
-      startLoading("Loading documents...");
-
       const result = await fetchStudentsAction();
+      if (!result.success) return notify.error(String(result.message));
+      setStudents(result.data ?? []);
+    } finally {
+      stopLoading();
+    }
+  }, [startLoading, stopLoading]);
 
-      if (!result.success) {
-        notify.error(result.message as any);
-        console.error(result.message);
-        return;
-      }
-      setStudents(result.data);
-    } catch (error) {
-      console.error("Failed to fetch students:", error);
+  const handleDelete = async (student: StudentDataType) => {
+    if (
+      !window.confirm(
+        `Delete ${student.firstName} ${student.lastName} and their level assignments?`,
+      )
+    )
+      return;
+    startLoading("Deleting student...");
+    try {
+      const result = await deleteStudentAction(student.id);
+      if (!result.success) return notify.error(result.message);
+      setStudents((current) =>
+        current.filter((item) => item.id !== student.id),
+      );
+      notify.success(result.message);
     } finally {
       stopLoading();
     }
   };
+  const columns: DataTableColumn<StudentDataType>[] = [
+    ...studentColumns,
+
+    {
+      key: "actions",
+      header: "Actions",
+      className: "w-12 text-right",
+      render: (row) => (
+        <DataTableActions
+          label={`${row.firstName} ${row.lastName}`}
+          onEdit={() => router.push(`/students/${row.id}/edit`)}
+          onDelete={() => void handleDelete(row)}
+        />
+      ),
+    },
+  ];
+
   useEffect(() => {
-    fetchStudents();
+    void load();
   }, []);
 
   return (
     <div className="p-6">
-      <div className="flex flex-col gap-4 ">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Filter placeholder="Search student by" filterBy={studentColumns} />
-          <Button
-            onClick={() => {
-              router.push("/students/registration");
-            }}
-          >
+          <Button onClick={() => router.push("/students/registration")}>
             Add Student
           </Button>
         </div>
-        <DataTable columns={studentColumns} data={students ?? []} rowKey="id" />
+        <DataTable columns={columns} data={students} rowKey="id" />
       </div>
     </div>
   );

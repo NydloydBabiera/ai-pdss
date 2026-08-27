@@ -4,8 +4,14 @@ import { Gender } from "@/generated/prisma/enums";
 import { DynamicFieldConfig } from "@/_elements/cardForm";
 import { Checkbox } from "@/components/ui/checkbox";
 import React from "react";
-
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Button } from "@/components/ui/button";
+import { MoreHorizontal, Pencil, Trash2 } from "lucide-react";
 
 export type InstructorData = {
   id: number;
@@ -18,7 +24,7 @@ export type InstructorData = {
   gender: Gender;
   address: string;
   isActive: boolean;
-}
+};
 
 export type InstructorType = {
   firstName: string;
@@ -29,7 +35,13 @@ export type InstructorType = {
   birthDate: Date;
   gender: Gender;
   address: string;
-}
+};
+
+type InstructorColumnActions = {
+  onEdit: (instructor: InstructorData) => void;
+  onDelete: (instructor: InstructorData) => void;
+};
+
 
 export const instructorColumns: DataTableColumn<InstructorData>[] = [
   {
@@ -65,7 +77,6 @@ export const instructorColumns: DataTableColumn<InstructorData>[] = [
         disabled: true,
       }),
   },
-
 ];
 
 export const instructorFields: Array<DynamicFieldConfig> = [
@@ -130,4 +141,4 @@ export const instructorFields: Array<DynamicFieldConfig> = [
     placeholder: "Enter address",
     required: true,
   },
-]
+];

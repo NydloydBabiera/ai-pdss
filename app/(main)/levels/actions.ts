@@ -1,7 +1,25 @@
 "use server"
 
 import { AcademicLevelData, AcademicLevelType } from "@/_config/levelsConfig";
-import { createAcademicLevel, fetchAcademicLevels } from "@/services/academic.service";
+import { createAcademicLevel, deleteAcademicLevel, fetchAcademicLevels, updateAcademicLevel } from "@/services/academic.service";
+
+const errorMessage = (error: unknown) => error instanceof Error ? error.message : "Something went wrong.";
+
+export async function updateAcademicLevelAction(id: number, data: AcademicLevelType) {
+    try {
+        return { success: true as const, message: "Academic level updated successfully.", data: await updateAcademicLevel(id, data) };
+    } catch (error) {
+        return { success: false as const, message: errorMessage(error) };
+    }
+}
+
+export async function deleteAcademicLevelAction(id: number) {
+    try {
+        return { success: true as const, message: "Academic level deleted successfully.", data: await deleteAcademicLevel(id) };
+    } catch (error) {
+        return { success: false as const, message: errorMessage(error) };
+    }
+}
 
 export async function createAcademicLevelAction(data: AcademicLevelType) {
     try {

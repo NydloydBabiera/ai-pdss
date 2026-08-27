@@ -37,14 +37,11 @@ export async function updateAcademicYear(id: number, academicYear: AcademicYearT
     return data;
 }
 
-export async function deleteAcademicYear(id: number): Promise<Boolean> {
-    const data = await prisma.academicYear.delete({
-        where: {
-            id: id
-        }
+export async function deleteAcademicYear(id: number): Promise<AcademicYearData> {
+    return prisma.$transaction(async (tx) => {
+        await tx.studentLevel.deleteMany({ where: { academicYearId: id } })
+        return tx.academicYear.delete({ where: { id } })
     })
-
-    return true;
 }
 
 
@@ -65,23 +62,20 @@ export async function fetchAcademicLevels(): Promise<AcademicLevelData[]> {
     return data
 }
 
-export async function updateAcademicLevel(id: number, academicYear: AcademicYearType): Promise<AcademicLevelData> {
+export async function updateAcademicLevel(id: number, academicLevel: AcademicLevelType): Promise<AcademicLevelData> {
     const data = await prisma.academicLevel.update({
         where: {
             id: id,
         },
-        data: academicYear
+        data: academicLevel
     })
 
     return data;
 }
 
-export async function deleteAcademicLevel(id: number): Promise<Boolean> {
-    const data = await prisma.academicLevel.delete({
-        where: {
-            id: id
-        }
+export async function deleteAcademicLevel(id: number): Promise<AcademicLevelData> {
+    return prisma.$transaction(async (tx) => {
+        await tx.studentLevel.deleteMany({ where: { academicLevelId: id } })
+        return tx.academicLevel.delete({ where: { id } })
     })
-
-    return true;
 }

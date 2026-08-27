@@ -6,6 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "db:seed": "prisma db seed",
+    "db:deploy": "prisma migrate deploy && prisma db seed",
     "lint": "eslint",
     "lint:fix": "eslint --fix"
   },
@@ -39,6 +41,7 @@
     "eslint-config-next": "16.3.0",
     "prisma": "^7.9.1",
     "tailwindcss": "^4",
+    "tsx": "^4.23.12",
     "typescript": "^5"
   }
 }

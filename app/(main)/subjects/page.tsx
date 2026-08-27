@@ -7,100 +7,123 @@ import {
   SubjectType,
 } from "@/_config/subjectConfig";
 import { DataTable, DataTableColumn } from "@/_elements/dataTable";
+import { DataTableActions } from "@/_elements/dataTableActions";
 import { FormDialog } from "@/_elements/dialog";
 import { Filter } from "@/_elements/filter";
 import { useLoading } from "@/_elements/loadingScreen";
 import { Button } from "@/components/ui/button";
-import { useEffect, useState } from "react";
-import { createSubjectAction, fetchSubjectsAction } from "./action";
 import { notify } from "@/lib/notifications";
+import { useCallback, useEffect, useState } from "react";
+import {
+  createSubjectAction,
+  deleteSubjectAction,
+  fetchSubjectsAction,
+  updateSubjectAction,
+} from "./action";
 
 export default function SubjectsPage() {
-  const [subjects, setSubjects] = useState<SubjectData[]>();
+  const [subjects, setSubjects] = useState<SubjectData[]>([]);
+  const [selected, setSelected] = useState<SubjectData>();
   const [formOpen, setFormOpen] = useState(false);
   const { startLoading, stopLoading } = useLoading();
 
-  const fetchSubjects = async () => {
+  const load = useCallback(async () => {
+    startLoading("Fetching subjects...");
     try {
-      startLoading("Fetching subjects...");
-
       const result = await fetchSubjectsAction();
-
-      if (!result.success) {
-        notify.error(result.message as any);
-        console.error(result.message);
-        return;
-      }
-
-      setSubjects(result.data);
-    } catch (error) {
-      console.error(error);
-      notify.error(error as any);
+      if (!result.success) return notify.error(String(result.message));
+      setSubjects(result.data ?? []);
     } finally {
       stopLoading();
     }
-  };
-
+  }, [startLoading, stopLoading]);
   const handleSubmit = async (values: Record<string, string | boolean>) => {
-    console.log("🚀 ~ handleSubmit ~ values:", values);
-
-    startLoading("Saving subject...");
-
+    startLoading(selected ? "Updating subject..." : "Creating subject...");
     try {
-      const subject: SubjectType = {
+      const data: SubjectType = {
         title: String(values.title),
         description: String(values.description),
         code: String(values.code),
       };
-
-      const result = await createSubjectAction(subject);
-
-      console.log("🚀 ~ handleSubmit ~ result:", result);
-
-      if (!result.success) {
-        notify.error(result.message as any);
-        console.error(result.message);
-        return;
-      }
-
+      const result = selected
+        ? await updateSubjectAction(selected.id, data)
+        : await createSubjectAction(data);
+      if (!result.success) return notify.error(String(result.message));
+      notify.success(String(result.message));
       setFormOpen(false);
-      fetchSubjects();
-      console.log("Academic level created:", result.data);
-    } catch (error) {
-      console.error(error);
-      notify.error(error as any);
+      setSelected(undefined);
+      await load();
     } finally {
       stopLoading();
     }
   };
+  const handleDelete = async (row: SubjectData) => {
+    if (
+      !window.confirm(
+        `Delete ${row.title}? Existing schedules will be unassigned.`,
+      )
+    )
+      return;
+    startLoading("Deleting subject...");
+    try {
+      const result = await deleteSubjectAction(row.id);
+      if (!result.success) return notify.error(result.message);
+      setSubjects((current) => current.filter((item) => item.id !== row.id));
+      notify.success(result.message);
+    } finally {
+      stopLoading();
+    }
+  };
+  const columns: DataTableColumn<SubjectData>[] = [
+    ...subjectColumns,
+    {
+      key: "actions",
+      header: "Actions",
+      className: "w-12 text-right",
+      render: (row) => (
+        <DataTableActions
+          label={row.title}
+          onEdit={() => {
+            setSelected(row);
+            setFormOpen(true);
+          }}
+          onDelete={() => void handleDelete(row)}
+        />
+      ),
+    },
+  ];
+  const fields = selected
+    ? subjectFields.map((field) => ({
+        ...field,
+        defaultValue: String(selected[field.name as keyof SubjectData] ?? ""),
+      }))
+    : subjectFields;
 
-  useEffect(() =>{
-    fetchSubjects()
-  },[])
+  useEffect(() => {
+    void load();
+  }, []);
 
   return (
     <div className="p-6">
-      <div className="flex flex-col gap-4 ">
+      <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Filter placeholder="Search subject by" filterBy={subjectColumns} />
           <FormDialog
+            key={selected?.id ?? "new"}
             open={formOpen}
             trigger={<Button>ADD SUBJECT</Button>}
-            title="Add new subject"
-            description="Fill in the details to add a new academic level."
-            fields={subjectFields}
-            onSubmit={(values) => {
-              console.log("🚀 ~ LevelsPage ~ values:", values);
-              handleSubmit(values);
+            title={selected ? "Edit Subject" : "Add Subject"}
+            description="Fill in the subject details."
+            fields={fields}
+            submitText={selected ? "Save Changes" : "Submit"}
+            onSubmit={handleSubmit}
+            onOpenChange={(open) => {
+              setFormOpen(open);
+              if (!open) setSelected(undefined);
             }}
-            onOpenChange={setFormOpen}
           />
         </div>
-        {/* <div className="flex items-center gap-2">
-          <Filter placeholder="Search subject by" filterBy={subjectColumns} />
-          <Button>Add Subject</Button>
-        </div> */}
-        <DataTable columns={subjectColumns} data={subjects ?? []} rowKey="id" />
+        <DataTable columns={columns} data={subjects} rowKey="id" />
       </div>
     </div>
   );

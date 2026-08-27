@@ -1,14 +1,13 @@
-import { AccountData } from "@/_config/accountConfig";
 import { AppBreadcrumb } from "@/_elements/appBreadcrumb";
 import { AppSidebar } from "@/_elements/appSidebar";
 import { AuthProvider } from "@/_elements/authProvider";
-import { BreadCrumbProvider } from "@/_elements/breadCrumbProvider";
 import { LoadingProvider } from "@/_elements/loadingScreen";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { Toaster } from "@/components/ui/sonner";
 import { getCurrentUser } from "@/services/account.service";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { Suspense } from "react";
 
 export default async function ProtectedMain({
   children,
@@ -43,7 +42,9 @@ export default async function ProtectedMain({
               <SidebarTrigger />
               <div className="h-4 w-px bg-border" />{" "}
               {/* optional visual divider */}
-              <AppBreadcrumb />
+              <Suspense fallback={<span className="text-sm text-muted-foreground">Loading navigation...</span>}>
+                <AppBreadcrumb />
+              </Suspense>
             </div>
             {children}
             <Toaster />
