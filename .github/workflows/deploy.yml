@@ -22,20 +22,15 @@ jobs:
 
             cd /var/web/ai-pdss
 
-            # Get latest master branch
             git fetch origin
             git checkout master
             git reset --hard origin/master
 
-            # Install dependencies
             npm ci
 
-            # Prisma
             npx prisma generate
             npx prisma migrate deploy
 
-            # Build Next.js app
             npm run build
 
-            # Restart application
-            pm2 restart my-app
+            pm2 restart ai-pdss --update-env
