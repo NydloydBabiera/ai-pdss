@@ -1,4 +1,4 @@
-name: Deploy to Hostinger VPS
+name: Deploy AI-PDSS
 
 on:
   push:
@@ -10,13 +10,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to VPS
+      - name: Validate deployment secrets
+        run: |
+          if [ -z "${{ secrets.VPS_HOST }}" ]; then
+            echo "ERROR: VPS_HOST is empty or unavailable"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.VPS_USER }}" ]; then
+            echo "ERROR: VPS_USER is empty or unavailable"
+            exit 1
+          fi
+
+          if [ -z "${{ secrets.VPS_SSH_KEY }}" ]; then
+            echo "ERROR: VPS_SSH_KEY is empty or unavailable"
+            exit 1
+          fi
+
+          echo "Deployment secrets are available"
+
+      - name: Deploy to Hostinger VPS
         uses: appleboy/ssh-action@v1
         with:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
-          port: ${{ secrets.VPS_PORT }}
+          port: ${{ secrets.VPS_PORT || 22 }}
           script: |
             set -e
 
