@@ -1,0 +1,41 @@
+name: Deploy to Hostinger VPS
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy to VPS
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          port: ${{ secrets.VPS_PORT }}
+          script: |
+            set -e
+
+            cd /var/www/my-app
+
+            # Get latest master branch
+            git fetch origin
+            git checkout master
+            git reset --hard origin/master
+
+            # Install dependencies
+            npm ci
+
+            # Prisma
+            npx prisma generate
+            npx prisma migrate deploy
+
+            # Build Next.js app
+            npm run build
+
+            # Restart application
+            pm2 restart my-app
