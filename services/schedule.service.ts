@@ -73,7 +73,7 @@ export async function createSchedules(subjectId: number, rows: ScheduleInput[]):
     return prisma.$transaction(async (tx) => {
         await tx.subject.findUniqueOrThrow({ where: { id: subjectId } });
         const overlap = await tx.schedule.findFirst({
-            where: { isActive: true, OR: normalized.map(({ dayCode, time }) => ({ dayCode, time })) },
+            where: { isActive: true, subjectId: subjectId, OR: normalized.map(({ dayCode, time }) => ({ dayCode, time })) },
         });
         if (overlap) throw new Error("One of these day and time slots is already scheduled.");
 

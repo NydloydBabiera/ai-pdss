@@ -1,4 +1,5 @@
 "use client";
+import { useConfirmation } from "@/_elements/confirmationDialog";
 
 import {
   subjectColumns,
@@ -22,6 +23,7 @@ import {
 } from "./action";
 
 export default function SubjectsPage() {
+  const { confirm, confirmationDialog } = useConfirmation();
   const [subjects, setSubjects] = useState<SubjectData[]>([]);
   const [selected, setSelected] = useState<SubjectData>();
   const [formOpen, setFormOpen] = useState(false);
@@ -59,9 +61,9 @@ export default function SubjectsPage() {
   };
   const handleDelete = async (row: SubjectData) => {
     if (
-      !window.confirm(
+      !await confirm(
         `Delete ${row.title}? Existing schedules will be unassigned.`,
-      )
+       { title: "Delete confirmation", confirmLabel: "Delete", destructive: true })
     )
       return;
     startLoading("Deleting subject...");
@@ -105,6 +107,7 @@ export default function SubjectsPage() {
 
   return (
     <div className="p-6">
+      {confirmationDialog}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Filter placeholder="Search subject by" filterBy={subjectColumns} />

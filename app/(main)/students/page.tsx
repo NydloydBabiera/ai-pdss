@@ -1,4 +1,5 @@
 "use client";
+import { useConfirmation } from "@/_elements/confirmationDialog";
 
 import { studentColumns, StudentDataType } from "@/_config/studentConfig";
 import { DataTable, DataTableColumn } from "@/_elements/dataTable";
@@ -15,6 +16,7 @@ import {
 } from "./registration/action";
 
 export default function StudentsPage() {
+  const { confirm, confirmationDialog } = useConfirmation();
   const [students, setStudents] = useState<StudentDataType[]>([]);
   const { startLoading, stopLoading } = useLoading();
   const router = useRouter();
@@ -32,9 +34,9 @@ export default function StudentsPage() {
 
   const handleDelete = async (student: StudentDataType) => {
     if (
-      !window.confirm(
+      !await confirm(
         `Delete ${student.firstName} ${student.lastName} and their level assignments?`,
-      )
+       { title: "Delete confirmation", confirmLabel: "Delete", destructive: true })
     )
       return;
     startLoading("Deleting student...");
@@ -72,6 +74,7 @@ export default function StudentsPage() {
 
   return (
     <div className="p-6">
+      {confirmationDialog}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Filter placeholder="Search student by" filterBy={studentColumns} />

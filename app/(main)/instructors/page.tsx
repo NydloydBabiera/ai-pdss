@@ -1,4 +1,5 @@
 "use client";
+import { useConfirmation } from "@/_elements/confirmationDialog";
 import {
   instructorColumns,
   InstructorData,
@@ -18,6 +19,7 @@ import { notify } from "@/lib/notifications";
 import { DataTableActions } from "@/_elements/dataTableActions";
 
 export default function InstructorsPage() {
+  const { confirm, confirmationDialog } = useConfirmation();
   const router = useRouter();
   const [instructors, setInstructors] = useState<InstructorData[]>();
   const { startLoading, stopLoading } = useLoading();
@@ -56,9 +58,9 @@ export default function InstructorsPage() {
   }, [startLoading, stopLoading]);
   const handleDelete = useCallback(
     async (instructor: InstructorData) => {
-      const confirmed = window.confirm(
+      const confirmed = await confirm(
         `Delete ${instructor.firstName} ${instructor.lastName}? This action cannot be undone.`,
-      );
+       { title: "Delete confirmation", confirmLabel: "Delete", destructive: true });
 
       if (!confirmed) return;
 
@@ -86,7 +88,7 @@ export default function InstructorsPage() {
         stopLoading();
       }
     },
-    [startLoading, stopLoading],
+    [startLoading, stopLoading, confirm],
   );
 
   const columns: DataTableColumn<InstructorData>[] = [
@@ -111,6 +113,7 @@ export default function InstructorsPage() {
 
   return (
     <div className="p-6">
+      {confirmationDialog}
       <div className="flex flex-col gap-4 ">
         <div className="flex items-center gap-2">
           <Filter placeholder="Search student by" filterBy={columns} />

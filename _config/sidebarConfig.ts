@@ -15,6 +15,7 @@ import {
   UserPen,
   CalendarCheck,
   TableOfContents,
+  ClockArrowRight,
 } from "lucide-react"
 
 export type UserRole = Role
@@ -67,10 +68,10 @@ export const sidebarItems: SidebarItem[] = [
         roles: ["ADMIN", "TEACHER"],
       },
       {
-        title: "Subject load",
-        url: "/students/subject-load",
+        title: "Enrollment",
+        url: "/enrollment",
         icon: TableOfContents,
-        roles: ["ADMIN", "TEACHER"],
+        roles: ["ADMIN"],
       },
     ],
   },
@@ -104,6 +105,12 @@ export const sidebarItems: SidebarItem[] = [
         title: "Schedule",
         url: "/schedule",
         icon: CalendarDays,
+        roles: ["ADMIN", "TEACHER"],
+      },
+       {
+        title: "Subject Assignment",
+        url: "/subjectAssignment",
+        icon: ClockArrowRight,
         roles: ["ADMIN", "TEACHER"],
       },
     ],

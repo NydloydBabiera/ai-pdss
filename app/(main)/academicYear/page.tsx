@@ -1,4 +1,5 @@
 "use client";
+import { useConfirmation } from "@/_elements/confirmationDialog";
 
 import {
   academicYearColumns,
@@ -24,6 +25,7 @@ import {
 const monthValue = (date: Date) => new Date(date).toISOString().slice(0, 7);
 
 export default function AcademicYearPage() {
+  const { confirm, confirmationDialog } = useConfirmation();
   const [academicYears, setAcademicYears] = useState<AcademicYearData[]>([]);
   const [selected, setSelected] = useState<AcademicYearData>();
   const [formOpen, setFormOpen] = useState(false);
@@ -64,9 +66,9 @@ export default function AcademicYearPage() {
 
   const handleDelete = async (row: AcademicYearData) => {
     if (
-      !window.confirm(
+      !await confirm(
         "Delete this academic year and its student level assignments?",
-      )
+       { title: "Delete confirmation", confirmLabel: "Delete", destructive: true })
     )
       return;
     startLoading("Deleting academic year...");
@@ -117,6 +119,7 @@ export default function AcademicYearPage() {
 
   return (
     <div className="p-6">
+      {confirmationDialog}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Filter

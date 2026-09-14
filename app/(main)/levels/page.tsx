@@ -1,4 +1,5 @@
 "use client";
+import { useConfirmation } from "@/_elements/confirmationDialog";
 
 import {
   AcademicLevelData,
@@ -22,6 +23,7 @@ import {
 } from "./actions";
 
 export default function LevelsPage() {
+  const { confirm, confirmationDialog } = useConfirmation();
   const [levels, setLevels] = useState<AcademicLevelData[]>([]);
   const [selected, setSelected] = useState<AcademicLevelData>();
   const [formOpen, setFormOpen] = useState(false);
@@ -63,9 +65,9 @@ export default function LevelsPage() {
 
   const handleDelete = async (row: AcademicLevelData) => {
     if (
-      !window.confirm(
+      !await confirm(
         `Delete ${row.level} ${row.class} and its student assignments?`,
-      )
+       { title: "Delete confirmation", confirmLabel: "Delete", destructive: true })
     )
       return;
     startLoading("Deleting academic level...");
@@ -112,6 +114,7 @@ export default function LevelsPage() {
 
   return (
     <div className="p-6">
+      {confirmationDialog}
       <div className="flex flex-col gap-4">
         <div className="flex items-center gap-2">
           <Filter placeholder="Search level by" filterBy={levelsColumns} />

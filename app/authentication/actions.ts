@@ -32,7 +32,10 @@ export async function loginAction(data: AccountType) {
 
         return {
             success: false,
-            message: error,
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Unable to login",
         };
     }
 }
@@ -63,30 +66,30 @@ export async function updatePasswordAction(data: UpdatePasswordType) {
 }
 
 export async function logoutAction() {
-  try {
-    const cookieStore = await cookies();
+    try {
+        const cookieStore = await cookies();
 
-    const token = cookieStore.get("token")?.value;
+        const token = cookieStore.get("token")?.value;
 
-    if (token) {
-      await logOut(token);
+        if (token) {
+            await logOut(token);
+        }
+
+        cookieStore.delete("token");
+
+        return {
+            success: true,
+            message: "Logged out successfully",
+        };
+    } catch (error) {
+        console.error("Logout error:", error);
+
+        return {
+            success: false,
+            message:
+                error instanceof Error
+                    ? error.message
+                    : "Failed to logout",
+        };
     }
-
-    cookieStore.delete("token");
-
-    return {
-      success: true,
-      message: "Logged out successfully",
-    };
-  } catch (error) {
-    console.error("Logout error:", error);
-
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to logout",
-    };
-  }
 }
