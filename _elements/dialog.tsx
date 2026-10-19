@@ -64,15 +64,27 @@ export function FormDialog({
   footer,
   children,
 }: FormDialogProps) {
-  const [values, setValues] = useState<Record<string, string | boolean>>(
+  const getInitialValues = () =>
     fields.reduce(
       (acc, field) => {
-        acc[field.name] = field.defaultValue ?? "";
+        acc[field.name] =
+          field.defaultValue ?? (field.type === "checkbox" ? false : "");
         return acc;
       },
       {} as Record<string, string | boolean>,
-    ),
-  );
+    );
+
+  const [values, setValues] =
+    useState<Record<string, string | boolean>>(getInitialValues);
+
+  const clearFields = () => {
+    setValues(getInitialValues());
+  };
+
+  const handleOpenChange = (isOpen: boolean) => {
+    if (isOpen) clearFields();
+    onOpenChange?.(isOpen);
+  };
 
   const handleChange = (name: string, value: string | boolean) => {
     setValues((prev) => ({
@@ -88,7 +100,7 @@ export function FormDialog({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       {trigger && <DialogTrigger render={trigger} />}
 
       <DialogContent>
@@ -258,7 +270,7 @@ export function FormDialog({
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => onOpenChange?.(false)}
+                  onClick={() => handleOpenChange(false)}
                 >
                   {cancelText}
                 </Button>

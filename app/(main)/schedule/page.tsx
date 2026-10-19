@@ -1,4 +1,5 @@
 "use client";
+import { useConfirmation } from "@/_elements/confirmationDialog";
 
 import { ScheduleInput } from "@/_config/scheduleConfig";
 import { SubjectData } from "@/_config/subjectConfig";
@@ -62,13 +63,17 @@ const inputTime = (value: Date | string) => {
 };
 
 export default function SchedulesPage() {
+  const { confirm, confirmationDialog } = useConfirmation();
   const [subjects, setSubjects] = useState<SubjectData[]>([]);
   const [subjectId, setSubjectId] = useState<number>();
   const [saved, setSaved] = useState<
     Array<{ id: number; day: string; dayCode: string; time: Date }>
   >([]);
   const [rows, setRows] = useState<ScheduleInput[]>([blankRow()]);
-  const [editing, setEditing] = useState<{ id: number; input: ScheduleInput }>();
+  const [editing, setEditing] = useState<{
+    id: number;
+    input: ScheduleInput;
+  }>();
   const { startLoading, stopLoading } = useLoading();
   const selectedSubject = useMemo(
     () => subjects.find((subject) => subject.id === subjectId),
@@ -139,9 +144,11 @@ export default function SchedulesPage() {
     try {
       const result = await updateScheduleAction(editing.id, editing.input);
       if (!result.success) return notify.error(result.message);
-      setSaved((current) => current.map((schedule) =>
-        schedule.id === editing.id ? result.data : schedule,
-      ));
+      setSaved((current) =>
+        current.map((schedule) =>
+          schedule.id === editing.id ? result.data : schedule,
+        ),
+      );
       setEditing(undefined);
       notify.success(result.message);
     } finally {
@@ -150,7 +157,8 @@ export default function SchedulesPage() {
   };
 
   const removeSchedule = async (id: number) => {
-    if (!window.confirm("Delete this schedule? This action cannot be undone.")) return;
+    if (!await confirm("Delete this schedule? This action cannot be undone.", { title: "Delete confirmation", confirmLabel: "Delete", destructive: true }))
+      return;
     startLoading("Deleting schedule...");
     try {
       const result = await deleteScheduleAction(id);
@@ -165,6 +173,7 @@ export default function SchedulesPage() {
 
   return (
     <div className="space-y-6 p-6">
+      {confirmationDialog}
       <Card>
         <CardHeader>
           <CardTitle>Subject schedule</CardTitle>
@@ -330,32 +339,111 @@ export default function SchedulesPage() {
                             <Select
                               value={editing.input.dayCode}
                               onValueChange={(code) => {
-                                const day = DAYS.find((item) => item[1] === code);
-                                if (day) setEditing({ id: schedule.id, input: { ...editing.input, day: day[0], dayCode: day[1] } });
+                                const day = DAYS.find(
+                                  (item) => item[1] === code,
+                                );
+                                if (day)
+                                  setEditing({
+                                    id: schedule.id,
+                                    input: {
+                                      ...editing.input,
+                                      day: day[0],
+                                      dayCode: day[1],
+                                    },
+                                  });
                               }}
                             >
-                              <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
-                              <SelectContent>{DAYS.map(([day, code]) => <SelectItem key={code} value={code}>{day}</SelectItem>)}</SelectContent>
+                              <SelectTrigger className="w-full">
+                                <SelectValue />
+                              </SelectTrigger>
+                              <SelectContent>
+                                {DAYS.map(([day, code]) => (
+                                  <SelectItem key={code} value={code}>
+                                    {day}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
                             </Select>
-                          ) : schedule.day}
+                          ) : (
+                            schedule.day
+                          )}
                         </TableCell>
-                        <TableCell>{isEditing ? editing.input.dayCode : schedule.dayCode}</TableCell>
+                        <TableCell>
+                          {isEditing ? editing.input.dayCode : schedule.dayCode}
+                        </TableCell>
                         <TableCell>
                           {isEditing ? (
-                            <Input type="time" value={editing.input.time} onChange={(event) => setEditing({ id: schedule.id, input: { ...editing.input, time: event.target.value } })} />
-                          ) : displayTime(schedule.time)}
+                            <Input
+                              type="time"
+                              value={editing.input.time}
+                              onChange={(event) =>
+                                setEditing({
+                                  id: schedule.id,
+                                  input: {
+                                    ...editing.input,
+                                    time: event.target.value,
+                                  },
+                                })
+                              }
+                            />
+                          ) : (
+                            displayTime(schedule.time)
+                          )}
                         </TableCell>
                         <TableCell>
                           <div className="flex justify-end gap-1">
                             {isEditing ? (
                               <>
-                                <Button type="button" size="icon" variant="ghost" aria-label="Save schedule" onClick={() => void saveEdit()}><Check /></Button>
-                                <Button type="button" size="icon" variant="ghost" aria-label="Cancel editing" onClick={() => setEditing(undefined)}><X /></Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  aria-label="Save schedule"
+                                  onClick={() => void saveEdit()}
+                                >
+                                  <Check />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  aria-label="Cancel editing"
+                                  onClick={() => setEditing(undefined)}
+                                >
+                                  <X />
+                                </Button>
                               </>
                             ) : (
                               <>
-                                <Button type="button" size="icon" variant="ghost" aria-label="Edit schedule" onClick={() => setEditing({ id: schedule.id, input: { day: schedule.day, dayCode: schedule.dayCode, time: inputTime(schedule.time) } })}><Pencil /></Button>
-                                <Button type="button" size="icon" variant="ghost" aria-label="Delete schedule" onClick={() => void removeSchedule(schedule.id)}><Trash2 /></Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  aria-label="Edit schedule"
+                                  onClick={() =>
+                                    setEditing({
+                                      id: schedule.id,
+                                      input: {
+                                        day: schedule.day,
+                                        dayCode: schedule.dayCode,
+                                        time: inputTime(schedule.time),
+                                      },
+                                    })
+                                  }
+                                >
+                                  <Pencil />
+                                </Button>
+                                <Button
+                                  type="button"
+                                  size="icon"
+                                  variant="ghost"
+                                  aria-label="Delete schedule"
+                                  onClick={() =>
+                                    void removeSchedule(schedule.id)
+                                  }
+                                >
+                                  <Trash2 />
+                                </Button>
                               </>
                             )}
                           </div>
